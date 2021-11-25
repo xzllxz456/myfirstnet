@@ -1,0 +1,44 @@
+[
+    {
+        "transactionName": "EeeeeeeeeegolangExists",
+        "transactionLabel": "A test EeeeeeeeeegolangExists transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "CreateEeeeeeeeeegolang",
+        "transactionLabel": "A test CreateEeeeeeeeeegolang transaction",
+        "arguments": [
+            "001",
+            "some value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "ReadEeeeeeeeeegolang",
+        "transactionLabel": "A test ReadEeeeeeeeeegolang transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "UpdateEeeeeeeeeegolang",
+        "transactionLabel": "A test UpdateEeeeeeeeeegolang transaction",
+        "arguments": [
+            "001",
+            "some other value"
+        ],
+        "transientData": {}
+    },
+    {
+        "transactionName": "DeleteEeeeeeeeeegolang",
+        "transactionLabel": "A test DeleteEeeeeeeeeegolang transaction",
+        "arguments": [
+            "001"
+        ],
+        "transientData": {}
+    }
+]

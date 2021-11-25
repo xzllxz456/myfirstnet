@@ -1,0 +1,242 @@
+---
+Organizations:
+    - &TestOrdererOrg
+        Name: TestOrdererOrg
+        ID: TestOrdererOrgMSP
+        MSPDir: crypto-config/ordererOrganizations/testorderer.test/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('TestOrdererOrgMSP.member')"
+            Writers:
+                Type: Signature
+                Rule: "OR('TestOrdererOrgMSP.member')"
+            Admins:
+                Type: Signature
+                Rule: "OR('TestOrdererOrgMSP.admin')"
+
+        OrdererEndpoints:
+            - orderer.testorderer.test:7050
+    - &Test1Org
+        Name: Test1Org
+        ID: Test1OrgMSP
+        MSPDir: crypto-config/peerOrganizations/test1.test/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('Test1OrgMSP.admin', 'Test1OrgMSP.peer', 'Test1OrgMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('Test1OrgMSP.admin', 'Test1OrgMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('Test1OrgMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('Test1OrgMSP.peer')"
+
+        AnchorPeers:
+            - Host: peer0.test1.test
+              Port: 7051
+    - &Test2Org
+        Name: Test2Org
+        ID: Test2OrgMSP
+        MSPDir: crypto-config/peerOrganizations/test2.test/msp
+        Policies:
+            Readers:
+                Type: Signature
+                Rule: "OR('Test2OrgMSP.admin', 'Test2OrgMSP.peer', 'Test2OrgMSP.client')"
+            Writers:
+                Type: Signature
+                Rule: "OR('Test2OrgMSP.admin', 'Test2OrgMSP.client')"
+            Admins:
+                Type: Signature
+                Rule: "OR('Test2OrgMSP.admin')"
+            Endorsement:
+                Type: Signature
+                Rule: "OR('Test2OrgMSP.peer')"
+
+        AnchorPeers:
+            - Host: peer0.test2.test
+              Port: 8051
+
+Capabilities:
+    Channel: &ChannelCapabilities
+        V2_0: true
+    Orderer: &OrdererCapabilities
+        V2_0: true
+    Application: &ApplicationCapabilities
+        V2_0: true
+
+Application: &ApplicationDefaults
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        LifecycleEndorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+        Endorsement:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Endorsement"
+
+    Capabilities:
+        <<: *ApplicationCapabilities
+
+Orderer: &OrdererDefaults
+    OrdererType: solo
+    Addresses:
+        - orderer.testorderer.test:7050
+    BatchTimeout: 2s
+    BatchSize:
+        MaxMessageCount: 10
+        AbsoluteMaxBytes: 99 MB
+        PreferredMaxBytes: 512 KB
+
+    Kafka:
+        Brokers:
+            - 127.0.0.1:9092
+
+    EtcdRaft:
+        Consenters:
+            - Host: orderer.testorderer.test
+              Port: 7050
+              ClientTLSCert: crypto-config/ordererOrganizations/testorderer.test/orderers/orderer.testorderer.test/tls/server.crt
+              ServerTLSCert: crypto-config/ordererOrganizations/testorderer.test/orderers/orderer.testorderer.test/tls/server.crt
+
+    Organizations:
+
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+        BlockValidation:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+
+Channel: &ChannelDefaults
+    Policies:
+        Readers:
+            Type: ImplicitMeta
+            Rule: "ANY Readers"
+        Writers:
+            Type: ImplicitMeta
+            Rule: "ANY Writers"
+        Admins:
+            Type: ImplicitMeta
+            Rule: "MAJORITY Admins"
+
+    Capabilities:
+        <<: *ChannelCapabilities
+
+Profiles:
+
+    TwoOrgsTestOrdererGenesis:
+       <<: *ChannelDefaults
+       Orderer:
+           <<: *OrdererDefaults
+           Organizations:
+               - *TestOrdererOrg
+           Capabilities:
+               <<: *OrdererCapabilities
+       Consortiums:
+           TestTwoConsortium:
+               Organizations:
+                   - *Test1Org
+                   - *Test2Org
+           TestOneConsirtium:
+               Organizations:
+                   - *Test2Org
+    TwoOrgTestChannel:
+        Consortium: TestTwoConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Test1Org
+                - *Test2Org
+            Capabilities:
+               <<: *ApplicationCapabilities
+    OneOrgTestChannel:
+        Consortium: TestOneConsortium
+        <<: *ChannelDefaults
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+                - *Test2Org
+            Capabilities:
+               <<: *ApplicationCapabilities
+
+    TestDevModeKafka:
+        <<: *ChannelDefaults
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            OrdererType: kafka
+            Kafka:
+                Brokers:
+                - kafka.testorderer.test:9092
+            Organizations:
+            - *TestOrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+            - <<: *TestOrdererOrg
+        Consortiums:
+            TestTwoConsortium:
+                Organizations:
+                - *Test1Org
+                - *Test2Org
+            TestOneConsortium:
+                Organizations:
+                - *Test2Org
+
+    TestMultiNodeEtcdRaft:
+        <<: *ChannelDefaults
+        Capabilities:
+            <<: *ChannelCapabilities
+        Orderer:
+            <<: *OrdererDefaults
+            OrdererType: etcdraft
+            EtcdRaft:
+                Consenters:
+                - Host: orderer.testorderer.test
+                  Port: 7050
+                  ClientTLSCert: crypto-config/ordererOrganizations/testorderer.test/orderers/orderer.testorderer.test/tls/server.crt
+                  ServerTLSCert: crypto-config/ordererOrganizations/testorderer.test/orderers/orderer.testorderer.test/tls/server.crt
+            Addresses:
+                - orderer.testorderer.test:7050
+
+            Organizations:
+            - *TestOrdererOrg
+            Capabilities:
+                <<: *OrdererCapabilities
+        Application:
+            <<: *ApplicationDefaults
+            Organizations:
+            - <<: *TestOrdererOrg
+        Consortiums:
+            TestTwoConsortium:
+                Organizations:
+                - *Test1Org
+                - *Test2Org
+            TestOneConsortium:
+                Organizations:
+                - *Test2Org

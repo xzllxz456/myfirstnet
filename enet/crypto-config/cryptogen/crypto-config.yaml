@@ -1,0 +1,31 @@
+OrdererOrgs:
+  # ---------------------------------------------------------------------------
+  # TradeOrderer
+  # ---------------------------------------------------------------------------
+  - Name: TestOrderer
+    Domain: testorderer.test
+    EnableNodeOUs: true
+    # ---------------------------------------------------------------------------
+    # "Specs" - See PeerOrgs below for complete description
+    # ---------------------------------------------------------------------------
+    Specs:
+      - Hostname: orderer
+
+PeerOrgs:
+  # ---------------------------------------------------------------------------
+  # ExporterOrg
+  # ---------------------------------------------------------------------------
+  - Name: Test1Org
+    Domain: test1.test
+    EnableNodeOUs: true
+    Template:
+      Count: 1 
+    Users:
+      Count: 1
+  - Name: Test2Org
+    Domain: test2.test
+    EnableNodeOUs: true
+    Template:
+      Count: 1
+    Users:
+      Count: 1

@@ -1,0 +1,60 @@
+version: '2'
+
+services:
+
+  orderer.testorderer.test:
+    container_name: orderer.testorderer.test
+    extends:
+      file: peer-base.yaml
+      service: orderer-base
+    volumes:
+    - ../channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
+    - ../crypto-config/ordererOrganizations/testorderer.test/orderers/orderer.testorderer.test/msp:/var/hyperledger/orderer/msp
+    - ../crypto-config/ordererOrganizations/testorderer.test/orderers/orderer.testorderer.test/tls/:/var/hyperledger/orderer/tls
+    - orderer.testorderer.test:/var/hyperledger/production/orderer
+    ports:
+      - 7050:7050
+
+  peer0.test1.test:
+    container_name: peer0.test1.test
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.test1.test
+      - CORE_PEER_ADDRESS=peer0.test1.test:7051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:7051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.test1.test:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.test1.test:7051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.test1.test:7051
+      - CORE_PEER_LOCALMSPID=Test1OrgMSP
+    volumes:
+        - /var/run/docker.sock:/host/var/run/docker.sock
+        - ../crypto-config/peerOrganizations/test1.test/peers/peer0.test1.test/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/test1.test/peers/peer0.test1.test/tls:/etc/hyperledger/fabric/tls
+        - peer0.test1.test:/var/hyperledger/production
+    ports:
+      - 7051:7051
+
+  peer0.test2.test:
+    container_name: peer0.test2.test
+    extends:
+      file: peer-base.yaml
+      service: peer-base
+    environment:
+      - CORE_PEER_ID=peer0.test2.test
+      - CORE_PEER_ADDRESS=peer0.test2.test:8051
+      - CORE_PEER_LISTENADDRESS=0.0.0.0:8051
+      - CORE_PEER_CHAINCODEADDRESS=peer0.test2.test:7052
+      - CORE_PEER_CHAINCODELISTENADDRESS=0.0.0.0:7052
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.test2.test:8051
+      - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.test2.test:8051
+      - CORE_PEER_LOCALMSPID=Test2OrgMSP
+    volumes:
+        - /var/run/docker.sock:/host/var/run/docker.sock
+        - ../crypto-config/peerOrganizations/test2.test/peers/peer0.test2.test/msp:/etc/hyperledger/fabric/msp
+        - ../crypto-config/peerOrganizations/test2.test/peers/peer0.test2.test/tls:/etc/hyperledger/fabric/tls
+        - peer0.test2.test:/var/hyperledger/production
+    ports:
+      - 8051:8051
